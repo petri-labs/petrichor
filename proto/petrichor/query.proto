@@ -1,0 +1,244 @@
+syntax = "proto3";
+package petrichor.petrichor;
+
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "petrichor/params.proto";
+import "petrichor/petrichor.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "petrichor/delegations.proto";
+
+option go_package = "github.com/petrinetwork/petrichor/x/petrichor/types";
+
+service Query {
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/terra/petrichors/params";
+  }
+
+  // Query paginated petrichors
+  rpc Petrichors(QueryPetrichorsRequest) returns (QueryPetrichorsResponse) {
+    option (google.api.http).get = "/terra/petrichors";
+  }
+
+  // Query a specific petrichor by ibc hash
+  rpc IBCPetrichor(QueryIBCPetrichorRequest) returns (QueryPetrichorResponse) {
+    option (google.api.http).get = "/terra/petrichors/ibc/{hash}";
+  }
+
+  // Query all paginated petrichor delegations
+  rpc AllPetrichorsDelegations(QueryAllPetrichorsDelegationsRequest) returns (QueryPetrichorsDelegationsResponse) {
+    option (google.api.http).get = "/terra/petrichors/delegations";
+  }
+
+  // Query petrichor validator
+  rpc PetrichorValidator(QueryPetrichorValidatorRequest) returns (QueryPetrichorValidatorResponse) {
+    option (google.api.http).get = "/terra/petrichors/validators/{validator_addr}";
+  }
+
+  // Query all paginated petrichor validators
+  rpc AllPetrichorValidators(QueryAllPetrichorValidatorsRequest) returns (QueryPetrichorValidatorsResponse) {
+    option (google.api.http).get = "/terra/petrichors/validators";
+  }
+
+  // Query all paginated petrichor delegations for a delegator addr
+  rpc PetrichorsDelegation(QueryPetrichorsDelegationsRequest) returns (QueryPetrichorsDelegationsResponse) {
+    option (google.api.http).get = "/terra/petrichors/delegations/{delegator_addr}";
+  }
+
+  // Query all paginated petrichor delegations for a delegator addr and validator_addr
+  rpc PetrichorsDelegationByValidator(QueryPetrichorsDelegationByValidatorRequest) returns (QueryPetrichorsDelegationsResponse) {
+    option (google.api.http).get = "/terra/petrichors/delegations/{delegator_addr}/{validator_addr}";
+  }
+
+  // Query a delegation to an petrichor by delegator addr, validator_addr and denom
+  rpc PetrichorDelegation(QueryPetrichorDelegationRequest) returns (QueryPetrichorDelegationResponse) {
+    option (google.api.http).get = "/terra/petrichors/delegations/{delegator_addr}/{validator_addr}/{denom}";
+  }
+
+  // Query a delegation to an petrichor by delegator addr, validator_addr and denom
+  rpc IBCPetrichorDelegation(QueryIBCPetrichorDelegationRequest) returns (QueryPetrichorDelegationResponse) {
+    option (google.api.http).get = "/terra/petrichors/delegations/{delegator_addr}/{validator_addr}/ibc/{hash}";
+  }
+
+  // Query for rewards by delegator addr, validator_addr and denom
+  rpc PetrichorDelegationRewards(QueryPetrichorDelegationRewardsRequest) returns (QueryPetrichorDelegationRewardsResponse) {
+    option (google.api.http).get = "/terra/petrichors/rewards/{delegator_addr}/{validator_addr}/{denom}";
+  }
+  // Query for rewards by delegator addr, validator_addr and denom
+  rpc IBCPetrichorDelegationRewards(QueryIBCPetrichorDelegationRewardsRequest) returns (QueryPetrichorDelegationRewardsResponse) {
+    option (google.api.http).get = "/terra/petrichors/rewards/{delegator_addr}/{validator_addr}/ibc/{hash}";
+  }
+
+  // Query a specific petrichor by denom
+  rpc Petrichor(QueryPetrichorRequest) returns (QueryPetrichorResponse) {
+    option (google.api.http).get = "/terra/petrichors/{denom}";
+  }
+}
+
+// Params
+message QueryParamsRequest { }
+
+message QueryParamsResponse {
+  Params params = 1 [(gogoproto.nullable) = false];
+}
+
+// Petrichors
+message QueryPetrichorsRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+
+}
+message QueryPetrichorsResponse {
+  repeated PetrichorAsset petrichors = 1 [(gogoproto.nullable) = false];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// Petrichor
+message QueryPetrichorRequest {
+  string denom = 1;
+}
+
+message QueryPetrichorResponse {
+  PetrichorAsset petrichor = 1;
+}
+
+message QueryIBCPetrichorRequest {
+  string hash = 1;
+}
+
+message QueryPetrichorValidatorRequest {
+  option (gogoproto.equal)           = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string validator_addr = 1;
+}
+
+message QueryAllPetrichorValidatorsRequest {
+  option (gogoproto.equal)           = false;
+  option (gogoproto.goproto_getters) = false;
+
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+message QueryAllPetrichorsDelegationsRequest {
+  option (gogoproto.equal)           = false;
+  option (gogoproto.goproto_getters) = false;
+
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// PetrichorsDelegation
+message QueryPetrichorsDelegationsRequest {
+  option (gogoproto.equal)           = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string delegator_addr = 1;
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// PetrichorsDelegationByValidator
+message QueryPetrichorsDelegationByValidatorRequest {
+  option (gogoproto.equal)           = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string delegator_addr  = 1;
+  string validator_addr  = 2;
+  cosmos.base.query.v1beta1.PageRequest pagination = 3;
+}
+
+// DelegationResponse is equivalent to Delegation except that it contains a
+// balance in addition to shares which is more suitable for client responses.
+message DelegationResponse {
+  option (gogoproto.equal) = false;
+
+  Delegation delegation = 1 [(gogoproto.nullable) = false];
+
+  cosmos.base.v1beta1.Coin balance = 2 [(gogoproto.nullable) = false];
+}
+
+message QueryPetrichorsDelegationsResponse {
+  repeated DelegationResponse delegations = 1 [(gogoproto.nullable) = false];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// PetrichorDelegation
+message QueryPetrichorDelegationRequest {
+  option (gogoproto.equal)           = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string delegator_addr  = 1;
+  string validator_addr  = 2;
+  string denom           = 3;
+  cosmos.base.query.v1beta1.PageRequest pagination = 4;
+}
+
+message QueryIBCPetrichorDelegationRequest {
+  option (gogoproto.equal)           = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string delegator_addr  = 1;
+  string validator_addr  = 2;
+  string hash            = 3;
+  cosmos.base.query.v1beta1.PageRequest pagination = 4;
+}
+
+message QueryPetrichorDelegationResponse {
+  DelegationResponse delegation = 1 [(gogoproto.nullable) = false];
+}
+
+// PetrichorDelegation
+message QueryPetrichorDelegationRewardsRequest {
+  option (gogoproto.equal)           = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string delegator_addr  = 1;
+  string validator_addr  = 2;
+  string denom           = 3;
+  cosmos.base.query.v1beta1.PageRequest pagination = 4;
+}
+
+message QueryIBCPetrichorDelegationRewardsRequest {
+  option (gogoproto.equal)           = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string delegator_addr  = 1;
+  string validator_addr  = 2;
+  string hash            = 3;
+  cosmos.base.query.v1beta1.PageRequest pagination = 4;
+}
+
+message QueryPetrichorDelegationRewardsResponse {
+  option (gogoproto.equal)           = false;
+  option (gogoproto.goproto_getters) = false;
+
+  repeated cosmos.base.v1beta1.Coin rewards = 1 [
+    (gogoproto.nullable) = false,
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Coin"
+  ];
+}
+
+message QueryPetrichorValidatorResponse {
+  option (gogoproto.equal)           = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string validator_addr = 1;
+  repeated cosmos.base.v1beta1.DecCoin total_delegation_shares = 2 [
+    (gogoproto.nullable)   = false
+  ];
+  repeated cosmos.base.v1beta1.DecCoin validator_shares = 3 [
+    (gogoproto.nullable)   = false
+  ];
+  repeated cosmos.base.v1beta1.DecCoin total_staked = 4 [
+    (gogoproto.nullable)   = false
+  ];
+}
+
+message QueryPetrichorValidatorsResponse {
+  option (gogoproto.equal)           = false;
+  option (gogoproto.goproto_getters) = false;
+
+  repeated QueryPetrichorValidatorResponse validators = 1 [
+    (gogoproto.nullable)   = false
+  ];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
