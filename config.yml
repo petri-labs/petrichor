@@ -10,12 +10,14 @@ accounts:
   coins:
   - 2000000000token
   - 200000000stake
+  - 200000000upetri
   mnemonic: wine rich chunk that swim afford found auction travel dentist razor furnace
     fluid hidden happy enroll pilot dragon market broom bus merry salad assume
 - name: bob
   coins:
   - 10000token
   - 100000000stake
+  - 200000000upetri
   mnemonic: major spatial spoil earn capable receive tourist bronze call coral mango
     betray demand size certain strike decline pluck baby eight maple pyramid cage
     cabbage
@@ -24,6 +26,7 @@ faucet:
   coins:
   - 5token
   - 100000stake
+  - 200000000upetri
   host: 0.0.0.0:4500
 client:
   typescript:
